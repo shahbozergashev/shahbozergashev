@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+.netlify/
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+.env
+.env*.local
+__pycache__/
+.venv/
+data/youtube/.audio/

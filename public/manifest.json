@@ -1,0 +1,10 @@
+{
+  "name": "Ask Shaha",
+  "short_name": "Ask Shaha",
+  "description": "Unofficial AI clone of Shaha Dolimov",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f0e",
+  "theme_color": "#0f0f0e",
+  "icons": []
+}

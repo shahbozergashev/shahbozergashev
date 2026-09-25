@@ -1,0 +1,15 @@
+# Extra videos (interviews / podcasts on other channels) for scripts/download-youtube.py.
+# Videos from youtube.com/@shahadolimov are listed automatically. One URL per line; add more as you find them.
+https://www.youtube.com/watch?v=pDEOMCiT09M  Xalqaro darajadagi marketolog | Shahboz Dolimov
+https://www.youtube.com/watch?v=TMC-pE7OtEA  Shaha Dolimov bilan Birinchi Podcast | Azam Podcast #1
+https://www.youtube.com/watch?v=3QshfoGt4mw  Dunyoning TOP 1% Insonlar qatoriga kirishning sinalgan usuli | Shaxsiy Podcast #3
+https://www.youtube.com/watch?v=Bybqwt4RCjI  Marketologlar "TUPOY" bo'lib ketyaptimi? | NmaGap
+https://www.youtube.com/watch?v=Lry8l4WD12M  Kommunikatsion marketingdagi xatolar! | Marketing Ligasi
+https://www.youtube.com/watch?v=L5l1Vw_vUXE  YouTube'ning O'zbekistondagi kelajagi!
+https://www.youtube.com/watch?v=DWtshmKHcPs  YouTube kanali qanday boshlangan? | YouTube O'zbekiston
+https://www.youtube.com/watch?v=nexcdxM_XuU  Marketingni biznesga aylantirish
+https://www.youtube.com/watch?v=9BpGfj9JcsI  XATO
+https://www.youtube.com/watch?v=h2_BZAIxB-Q  Shaha Dolimov (MAQSAD) kitob taqdimoti
+https://www.youtube.com/watch?v=WXDQjN3c8wc  Maqsad — audiokitob
+https://www.youtube.com/watch?v=_kiiwOaCzJk  Maqsad — audiokitob
+https://www.youtube.com/watch?v=25335VUoUK4  Shaha Dolimov bilan ko'rishdik!
