@@ -22,13 +22,14 @@ Don't skip or reorder these steps. Ingest fails without the migration, and the a
 
 ## Secrets
 
-- The only env vars are `GEMINI_API_KEY`, `GEMINI_MODEL` (optional), `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. They live in `.env.local` (gitignored) locally and in Netlify's environment settings in production.
+- The only env vars are `GEMINI_API_KEY`, `GEMINI_MODEL` and `GEMINI_FALLBACK_MODEL` (both optional), `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. They live in `.env.local` (gitignored) locally and in Netlify's environment settings in production.
 - Never ask for key values in chat, echo them or commit them. Tell the user where to get a key and which file to put it in, then continue once they confirm.
 - Where to get them: Gemini from https://aistudio.google.com/apikey; Supabase from Project Settings → API (Project URL and the `service_role` key).
 - The service role key is server-only. Never import `src/lib/supabase.ts` or `src/lib/gemini.ts` from a `"use client"` file, and never add a `NEXT_PUBLIC_` prefix to these variables.
 
 ## Architecture conventions
 
+- **Chat model choice belongs in `.env.local`** (`GEMINI_MODEL`, `GEMINI_FALLBACK_MODEL`), not in code. A Gemini 429/503 is transient: `streamChat` already retries and falls back, so don't change the default model because of one.
 - **Gemini is called over REST** in `src/lib/gemini.ts` (`batchEmbedContents`, `streamGenerateContent?alt=sse`). Don't add the Vercel AI SDK or `@google/genai` to the app.
 - **Embeddings are 768-d** `gemini-embedding-001`, L2-normalized, with task type `RETRIEVAL_DOCUMENT` for ingest and `RETRIEVAL_QUERY` for search. Changing the model or dimension means a new migration (`vector(768)` column + `match_documents`) and a full re-ingest.
 - **Chat protocol:** `POST /api/chat` with `{ lang: "uz" | "en", messages: [{ role, content }] }` returns NDJSON lines `{type:"sources"}`, `{type:"text"}`, then `{type:"done"}` or `{type:"error"}`. `src/components/Chat.tsx` parses it, so change both sides together.

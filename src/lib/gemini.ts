@@ -38,13 +38,46 @@ export async function embed(texts: string[], taskType: TaskType): Promise<number
 
 export type ChatTurn = { role: "user" | "assistant"; content: string };
 
+const RETRYABLE = new Set([429, 500, 503]);
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Models to try in order: GEMINI_MODEL, then GEMINI_FALLBACK_MODEL (comma-separated). */
+function chatModels(): string[] {
+  const primary = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const fallbacks = (process.env.GEMINI_FALLBACK_MODEL ?? "gemini-flash-latest")
+    .split(",")
+    .map((m) => m.trim())
+    .filter(Boolean);
+  return [...new Set([primary, ...fallbacks])];
+}
+
+/**
+ * Opens a streaming request, retrying overloaded/rate-limited responses and then
+ * falling back to the next model. Retries happen before any text is streamed.
+ */
+async function openChatStream(body: string): Promise<Response> {
+  let lastError = "";
+  for (const model of chatModels()) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) await sleep(1000 * 2 ** attempt);
+      const res = await fetch(`${API}/${model}:streamGenerateContent?alt=sse&key=${apiKey()}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+      });
+      if (res.ok && res.body) return res;
+      lastError = `${model}: ${res.status} ${await res.text()}`;
+      if (!RETRYABLE.has(res.status)) break;
+    }
+    console.warn(`Gemini model unavailable, trying next: ${lastError}`);
+  }
+  throw new Error(`Gemini chat failed: ${lastError}`);
+}
+
 /** Streams generated text chunks from Gemini via server-sent events. */
 export async function* streamChat(system: string, turns: ChatTurn[]): AsyncGenerator<string> {
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
-  const res = await fetch(`${API}/${model}:streamGenerateContent?alt=sse&key=${apiKey()}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+  const res = await openChatStream(
+    JSON.stringify({
       systemInstruction: { parts: [{ text: system }] },
       contents: turns.map((t) => ({
         role: t.role === "assistant" ? "model" : "user",
@@ -52,10 +85,9 @@ export async function* streamChat(system: string, turns: ChatTurn[]): AsyncGener
       })),
       generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
     }),
-  });
-  if (!res.ok || !res.body) throw new Error(`Gemini chat failed: ${res.status} ${await res.text()}`);
+  );
 
-  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+  const reader = res.body!.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = "";
   while (true) {
     const { value, done } = await reader.read();

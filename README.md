@@ -34,6 +34,8 @@ npm install
 cp .env.example .env.local   # fill in GEMINI_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 ```
 
+If Gemini answers `503 UNAVAILABLE` (overloaded) or `429`, chat retries with backoff and then tries `GEMINI_FALLBACK_MODEL`. Pick either model in `.env.local` with no code change.
+
 **2. Database.** Create a Supabase project, then either run `supabase/migrations/20260925000000_init.sql` in the SQL editor, or `npx supabase link && npx supabase db push`.
 
 **3. Collect data.** Run this on your own machine; it needs normal internet access to Telegram and YouTube.
