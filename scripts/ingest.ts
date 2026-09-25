@@ -70,7 +70,7 @@ async function loadDocs(file: string): Promise<Doc[]> {
           content,
           source_type: "telegram_post",
           source_url: p.url,
-          source_title: `Telegram #${p.id}`,
+          source_title: `Telegram @${path.basename(file, ".json")} #${p.id}`,
           language: detectLanguage(p.text),
           published_at: toIso(p.date),
         })),

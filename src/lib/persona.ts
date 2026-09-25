@@ -9,7 +9,7 @@ export const persona = {
     en: "Founder of Meraki Marketing Agency, marketer and author of \"Maqsad\"",
   },
   links: [
-    { label: "Telegram", url: "https://t.me/shahadolimov_oilasi" },
+    { label: "Telegram", url: "https://t.me/shahadolimov" },
     { label: "YouTube", url: "https://www.youtube.com/@shahadolimov" },
     { label: "LinkedIn", url: "https://www.linkedin.com/in/shahadolimov/" },
   ],

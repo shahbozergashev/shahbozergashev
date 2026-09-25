@@ -2,7 +2,7 @@
  * Scrapes a public Telegram channel's web preview (t.me/s/<channel>) into data/telegram/<channel>.json.
  * Re-running merges new posts into the existing snapshot.
  *
- *   npx tsx scripts/fetch-telegram.ts --channel=shahadolimov_oilasi [--max-pages=200]
+ *   npx tsx scripts/fetch-telegram.ts --channel=shahadolimov [--max-pages=200]
  */
 import * as cheerio from "cheerio";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -16,7 +16,7 @@ const args = Object.fromEntries(
     return [k, v ?? "true"];
   }),
 );
-const channel = args.channel ?? "shahadolimov_oilasi";
+const channel = args.channel ?? "shahadolimov";
 const maxPages = Number(args["max-pages"] ?? 200);
 const outFile = path.join("data", "telegram", `${channel}.json`);
 

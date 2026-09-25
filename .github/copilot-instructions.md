@@ -6,7 +6,7 @@ Unofficial AI clone of Shaha Dolimov (founder of Meraki Marketing Agency). Next.
 
 - Node 22+, Python 3.10+ (YouTube script only), ffmpeg (only for `--gemini-fallback`).
 - `npm install` · `npm run dev` · `npm run build` · `npm run typecheck`
-- Data: `npm run fetch:telegram -- --channel=shahadolimov_oilasi` and `python scripts/download-youtube.py [--gemini-fallback]` (Python deps: `pip install -r scripts/requirements.txt` inside a `.venv`).
+- Data: `npm run fetch:telegram -- --channel=shahadolimov` and `python scripts/download-youtube.py [--gemini-fallback]` (Python deps: `pip install -r scripts/requirements.txt` inside a `.venv`).
 - Load: `npx tsx --env-file=.env.local scripts/ingest.ts` (add `--dry-run` to only count chunks; it needs no keys).
 - Before calling a change done, run `npm run typecheck` and `npm run build`.
 

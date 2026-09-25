@@ -41,8 +41,9 @@ If Gemini answers `503 UNAVAILABLE` (overloaded) or `429`, chat retries with bac
 **3. Collect data.** Run this on your own machine; it needs normal internet access to Telegram and YouTube.
 
 ```bash
-# Telegram channel archive -> data/telegram/shahadolimov_oilasi.json
-npm run fetch:telegram -- --channel=shahadolimov_oilasi
+# Telegram archives -> data/telegram/<channel>.json
+npm run fetch:telegram -- --channel=shahadolimov            # current channel
+npm run fetch:telegram -- --channel=shahadolimov_oilasi     # older channel (optional)
 
 # YouTube transcripts -> data/youtube/<id>.md (channel + extra URLs in data/youtube/videos.txt)
 python3 -m venv .venv && source .venv/bin/activate
