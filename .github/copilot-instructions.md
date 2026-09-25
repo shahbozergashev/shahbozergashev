@@ -4,7 +4,7 @@ Unofficial AI clone of Shaha Dolimov (founder of Meraki Marketing Agency). Next.
 
 ## Commands
 
-- Node 22+, Python 3.10+ (YouTube script only), ffmpeg (only for `--gemini-fallback`).
+- Node 22+, Python 3.10+ (YouTube script only; `uv venv --python 3.12` works where Homebrew doesn't). ffmpeg comes from the `imageio-ffmpeg` pip package when none is installed, so don't require a system install.
 - `npm install` · `npm run dev` · `npm run build` · `npm run typecheck`
 - Data: `npm run fetch:telegram -- --channel=shahadolimov` and `python scripts/download-youtube.py [--gemini-fallback]` (Python deps: `pip install -r scripts/requirements.txt` inside a `.venv`).
 - Load: `npx tsx --env-file=.env.local scripts/ingest.ts` (add `--dry-run` to only count chunks; it needs no keys).

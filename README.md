@@ -46,11 +46,15 @@ npm run fetch:telegram -- --channel=shahadolimov            # current channel
 npm run fetch:telegram -- --channel=shahadolimov_oilasi     # older channel (optional)
 
 # YouTube transcripts -> data/youtube/<id>.md (channel + extra URLs in data/youtube/videos.txt)
+# Needs Python 3.10+. No Homebrew? `curl -LsSf https://astral.sh/uv/install.sh | sh`, then
+# `uv venv --python 3.12 .venv && source .venv/bin/activate && uv pip install -r scripts/requirements.txt`
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r scripts/requirements.txt
 python scripts/download-youtube.py
-# Many Uzbek videos have no captions. Transcribe those with Gemini (needs ffmpeg):
-GEMINI_API_KEY=... python scripts/download-youtube.py --gemini-fallback
+# Many Uzbek videos have no captions. Transcribe those with Gemini (uses system ffmpeg,
+# or the one bundled with the imageio-ffmpeg package):
+set -a; source .env.local; set +a
+python scripts/download-youtube.py --gemini-fallback
 ```
 
 YouTube will start answering `429 Too Many Requests` after a few dozen videos. The script skips what's already downloaded, so wait ~20 minutes or switch networks (a phone hotspot works) and run it again.

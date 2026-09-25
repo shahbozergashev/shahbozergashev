@@ -5,7 +5,7 @@ URLs listed in data/youtube/videos.txt, saving each as data/youtube/<video_id>.m
     pip install -r scripts/requirements.txt
     python scripts/download-youtube.py [--channel https://www.youtube.com/@shahadolimov]
 
-Many Uzbek videos have no captions at all. Pass --gemini-fallback (needs ffmpeg and the
+Many Uzbek videos have no captions at all. Pass --gemini-fallback (needs the
 GEMINI_* variables from .env.local exported: `set -a; source .env.local; set +a`) to download
 the audio and have Gemini transcribe it instead.
 
@@ -16,6 +16,7 @@ import argparse
 import os
 import pathlib
 import re
+import shutil
 import sys
 import time
 
@@ -97,6 +98,15 @@ def gemini_generate(client, contents) -> str:
     raise RuntimeError(f"Gemini transcription failed: {last}")
 
 
+def ffmpeg_location() -> str | None:
+    """System ffmpeg if installed, else the binary bundled with the imageio-ffmpeg package."""
+    if shutil.which("ffmpeg"):
+        return None
+    import imageio_ffmpeg
+
+    return imageio_ffmpeg.get_ffmpeg_exe()
+
+
 def gemini_transcribe(video_id: str) -> tuple[str, str]:
     from google import genai
 
@@ -109,6 +119,8 @@ def gemini_transcribe(video_id: str) -> tuple[str, str]:
         "quiet": True,
         "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "64"}],
     }
+    if location := ffmpeg_location():
+        opts["ffmpeg_location"] = location
     with yt_dlp.YoutubeDL(opts) as ydl:
         ydl.download([f"https://www.youtube.com/watch?v={video_id}"])
     audio = tmp / f"{video_id}.mp3"
