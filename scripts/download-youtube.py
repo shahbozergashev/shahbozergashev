@@ -5,8 +5,9 @@ URLs listed in data/youtube/videos.txt, saving each as data/youtube/<video_id>.m
     pip install -r scripts/requirements.txt
     python scripts/download-youtube.py [--channel https://www.youtube.com/@shahadolimov]
 
-Many Uzbek videos have no captions at all. Pass --gemini-fallback (needs GEMINI_API_KEY and
-ffmpeg) to download the audio and have Gemini transcribe it instead.
+Many Uzbek videos have no captions at all. Pass --gemini-fallback (needs ffmpeg and the
+GEMINI_* variables from .env.local exported: `set -a; source .env.local; set +a`) to download
+the audio and have Gemini transcribe it instead.
 
 Already-downloaded videos are skipped, so when YouTube starts returning 429 (it will),
 wait ~20 minutes or switch networks (e.g. phone hotspot) and run it again.
@@ -73,6 +74,29 @@ def fetch_transcript(api: YouTubeTranscriptApi, video_id: str) -> tuple[str, str
     return t.language_code, re.sub(r"\s+", " ", text).strip()
 
 
+def gemini_models() -> list[str]:
+    """Same model settings as the app: GEMINI_MODEL, then GEMINI_FALLBACK_MODEL (comma-separated)."""
+    primary = os.environ.get("GEMINI_MODEL") or "gemini-2.5-flash"
+    fallbacks = os.environ.get("GEMINI_FALLBACK_MODEL", "gemini-flash-latest").split(",")
+    return list(dict.fromkeys(m.strip() for m in [primary, *fallbacks] if m.strip()))
+
+
+def gemini_generate(client, contents) -> str:
+    """Tries each model, retrying overload (503) and rate-limit (429) errors with backoff."""
+    last = None
+    for model in gemini_models():
+        for attempt in range(3):
+            try:
+                return client.models.generate_content(model=model, contents=contents).text or ""
+            except Exception as e:
+                last = e
+                if not any(code in str(e) for code in ("429", "500", "503")):
+                    break
+                time.sleep(10 * 2**attempt)
+        print(f"  Gemini model {model} unavailable, trying next: {str(last)[:120]}")
+    raise RuntimeError(f"Gemini transcription failed: {last}")
+
+
 def gemini_transcribe(video_id: str) -> tuple[str, str]:
     from google import genai
 
@@ -93,9 +117,9 @@ def gemini_transcribe(video_id: str) -> tuple[str, str]:
         while uploaded.state and uploaded.state.name == "PROCESSING":
             time.sleep(5)
             uploaded = client.files.get(name=uploaded.name)
-        resp = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[
+        text = gemini_generate(
+            client,
+            [
                 uploaded,
                 "Transcribe this audio verbatim in its original language (usually Uzbek, sometimes Russian "
                 "or English). Output only the transcript text, no timestamps or commentary. On the very "
@@ -105,9 +129,9 @@ def gemini_transcribe(video_id: str) -> tuple[str, str]:
         client.files.delete(name=uploaded.name)
     finally:
         audio.unlink(missing_ok=True)
-    first, _, rest = (resp.text or "").strip().partition("\n")
+    first, _, rest = text.strip().partition("\n")
     lang = first.strip().lower()
-    return (lang, rest.strip()) if lang in LANGS else ("uz", (resp.text or "").strip())
+    return (lang, rest.strip()) if lang in LANGS else ("uz", text.strip())
 
 
 def main() -> None:
@@ -139,6 +163,9 @@ def main() -> None:
             print(f"[{i}/{len(ids)}] {vid}: unavailable, skipped")
             continue
         except Exception as e:
+            if isinstance(e, RuntimeError) and str(e).startswith("Gemini"):
+                print(f"[{i}/{len(ids)}] {vid}: {str(e)[:160]} (re-run later to retry)")
+                continue
             if "429" in str(e) or "Too Many Requests" in str(e):
                 sys.exit(f"Rate limited by YouTube at {vid}. Wait or change IP, then re-run.")
             print(f"[{i}/{len(ids)}] {vid}: {e}")
