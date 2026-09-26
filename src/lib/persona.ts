@@ -3,7 +3,6 @@ export type Lang = "uz" | "en";
 export const persona = {
   name: "Shaha Dolimov",
   fullName: "Shahbozbek Dolimov",
-  initials: "SD",
   tagline: {
     uz: "Meraki marketing agentligi asoschisi, marketolog va \"Maqsad\" kitobi muallifi",
     en: "Founder of Meraki Marketing Agency, marketer and author of \"Maqsad\"",
