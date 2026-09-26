@@ -41,6 +41,7 @@ Don't skip or reorder these steps. Ingest fails without the migration, and the a
 - Persona facts, the system prompt, suggested questions and every UI string live in `src/lib/persona.ts`, with `uz` and `en` keys that must stay in sync. Uzbek is the default language and uses Latin script.
 - Only state facts about Shaha that come from `data/` or a cited public source. Don't invent clients, numbers, dates or quotes, in the prompt or in data files.
 - Keep the "unofficial AI clone" disclaimer in the UI and the system prompt's rule that it never claims to be the real person.
+- The clone only answers topics his content covers; off-topic questions (cooking, sports, health, code…) are declined. Replies that don't use the context (refusals, greetings) start with `NO_CONTEXT` (`[NO_CONTEXT]`, exported from `persona.ts`); `route.ts` strips it and sends an empty sources list. Change both sides together.
 - Data files go in `data/<folder>/` (`bio`, `articles`, `interviews`, `linkedin`, `youtube`, `book`, `telegram`), as `.md`/`.txt` with optional front matter (`title`, `url`, `type`, `language`, `date`). See `data/README.md`.
 
 ## Style
