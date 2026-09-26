@@ -56,6 +56,8 @@ export default function Chat() {
       const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
       let buffer = "";
       let failed = false;
+      let finished = false;
+      let received = false;
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
@@ -66,12 +68,16 @@ export default function Chat() {
           if (!line) continue;
           const event = JSON.parse(line);
           if (event.type === "sources") updateLast((m) => ({ ...m, sources: event.sources }));
-          else if (event.type === "text") updateLast((m) => ({ ...m, content: m.content + event.text }));
-          else if (event.type === "error") failed = true;
+          else if (event.type === "text") {
+            received = true;
+            updateLast((m) => ({ ...m, content: m.content + event.text }));
+          } else if (event.type === "error") failed = true;
+          else if (event.type === "done") finished = true;
         }
       }
-      if (failed) throw new Error(t.error);
-      updateLast((m) => ({ ...m, streaming: false }));
+      if (!received && (failed || !finished)) throw new Error(t.error);
+      // A cut-off stream (model stopped early, timeout, dropped connection) keeps the partial text.
+      updateLast((m) => ({ ...m, streaming: false, incomplete: failed || !finished }));
     } catch (err) {
       updateLast((m) => ({ ...m, streaming: false, error: err instanceof Error ? err.message : t.error }));
     } finally {
@@ -137,6 +143,7 @@ export default function Chat() {
                 key={i}
                 message={m.streaming && !m.content ? { ...m, content: t.thinking } : m}
                 sourcesLabel={t.sources}
+                incompleteLabel={t.incomplete}
               />
             ))
           )}

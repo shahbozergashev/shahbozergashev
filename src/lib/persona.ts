@@ -69,6 +69,7 @@ export const ui = {
       "Bu norasmiy AI klon. Javoblar Shaha Dolimovning ochiq kontentiga asoslangan va xato bo'lishi mumkin.",
     error: "Xatolik yuz berdi. Qaytadan urinib ko'ring.",
     rateLimited: "Juda ko'p so'rov. Bir daqiqadan so'ng urinib ko'ring.",
+    incomplete: "Javob to'liq kelmadi. Savolni qayta yuboring.",
   },
   en: {
     placeholder: "Ask Shaha anything...",
@@ -80,5 +81,6 @@ export const ui = {
       "Unofficial AI clone. Answers are generated from Shaha Dolimov's public content and may be wrong.",
     error: "Something went wrong. Please try again.",
     rateLimited: "Too many requests. Try again in a minute.",
+    incomplete: "The answer was cut off. Please ask again.",
   },
 } satisfies Record<Lang, Record<string, string>>;

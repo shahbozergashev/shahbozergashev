@@ -83,7 +83,8 @@ export async function* streamChat(system: string, turns: ChatTurn[]): AsyncGener
         role: t.role === "assistant" ? "model" : "user",
         parts: [{ text: t.content }],
       })),
-      generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+      // Thinking models spend part of this budget on reasoning before any visible text.
+      generationConfig: { temperature: 0.7, maxOutputTokens: 8192 },
     }),
   );
 
@@ -101,10 +102,14 @@ export async function* streamChat(system: string, turns: ChatTurn[]): AsyncGener
       for (const line of event.split("\n")) {
         if (!line.startsWith("data:")) continue;
         const payload = JSON.parse(line.slice(5)) as {
-          candidates?: { content?: { parts?: { text?: string }[] } }[];
+          candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[];
         };
-        const text = payload.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("");
+        const candidate = payload.candidates?.[0];
+        const text = candidate?.content?.parts?.map((p) => p.text ?? "").join("");
         if (text) yield text;
+        if (candidate?.finishReason && candidate.finishReason !== "STOP") {
+          throw new Error(`Gemini stopped early: ${candidate.finishReason}`);
+        }
       }
     }
   }

@@ -9,6 +9,7 @@ export type ChatMessage = {
   content: string;
   sources?: Source[];
   streaming?: boolean;
+  incomplete?: boolean;
   error?: string;
 };
 
@@ -22,7 +23,15 @@ const typeLabel: Record<string, string> = {
   bio: "Bio",
 };
 
-export default function Message({ message, sourcesLabel }: { message: ChatMessage; sourcesLabel: string }) {
+export default function Message({
+  message,
+  sourcesLabel,
+  incompleteLabel,
+}: {
+  message: ChatMessage;
+  sourcesLabel: string;
+  incompleteLabel: string;
+}) {
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
@@ -46,6 +55,11 @@ export default function Message({ message, sourcesLabel }: { message: ChatMessag
           <div className={`prose-chat break-words ${message.streaming ? "cursor" : ""}`}>
             <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
+        )}
+        {message.incomplete && (
+          <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>
+            {incompleteLabel}
+          </p>
         )}
         {!message.streaming && message.sources && message.sources.length > 0 && (
           <div className="mt-3">
